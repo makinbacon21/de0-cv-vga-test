@@ -1,5 +1,5 @@
 `timescale 1ns/10ps
-module  vga_pll_0002(
+module  pll_test_0002(
 
 	// interface 'refclk'
 	input wire refclk,
@@ -22,7 +22,7 @@ module  vga_pll_0002(
 		.reference_clock_frequency("50.0 MHz"),
 		.operation_mode("normal"),
 		.number_of_clocks(2),
-		.output_clock_frequency0("25.000000 MHz"),
+		.output_clock_frequency0("100.000000 MHz"),
 		.phase_shift0("0 ps"),
 		.duty_cycle0(50),
 		.output_clock_frequency1("200.000000 MHz"),

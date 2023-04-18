@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<instance entity-name="altera_pll" version="20.1" >
+<instance entity-name="altera_pll" version="14.0" >
 <generic name="debug_print_output" value="false" />
 <generic name="debug_use_rbc_taf_method" value="false" />
 <generic name="device_family" value="Cyclone V" />
-<generic name="device" value="5CEBA2F17A7" />
+<generic name="device" value="Unknown" />
 <generic name="gui_device_speed_grade" value="2" />
 <generic name="gui_pll_mode" value="Integer-N PLL" />
 <generic name="gui_reference_clock_frequency" value="50.0" />
@@ -12,14 +12,14 @@
 <generic name="gui_feedback_clock" value="Global Clock" />
 <generic name="gui_fractional_cout" value="32" />
 <generic name="gui_dsm_out_sel" value="1st_order" />
-<generic name="gui_use_locked" value="false" />
+<generic name="gui_use_locked" value="true" />
 <generic name="gui_en_adv_params" value="false" />
 <generic name="gui_number_of_clocks" value="2" />
 <generic name="gui_multiply_factor" value="1" />
 <generic name="gui_frac_multiply_factor" value="1" />
 <generic name="gui_divide_factor_n" value="1" />
 <generic name="gui_cascade_counter0" value="false" />
-<generic name="gui_output_clock_frequency0" value="25.0" />
+<generic name="gui_output_clock_frequency0" value="100.0" />
 <generic name="gui_divide_factor_c0" value="1" />
 <generic name="gui_actual_output_clock_frequency0" value="0 MHz" />
 <generic name="gui_ps_units0" value="ps" />
@@ -28,11 +28,11 @@
 <generic name="gui_actual_phase_shift0" value="0" />
 <generic name="gui_duty_cycle0" value="50" />
 <generic name="gui_cascade_counter1" value="false" />
-<generic name="gui_output_clock_frequency1" value="400.0" />
+<generic name="gui_output_clock_frequency1" value="100.0" />
 <generic name="gui_divide_factor_c1" value="1" />
 <generic name="gui_actual_output_clock_frequency1" value="0 MHz" />
 <generic name="gui_ps_units1" value="ps" />
-<generic name="gui_phase_shift1" value="0" />
+<generic name="gui_phase_shift1" value="-3000" />
 <generic name="gui_phase_shift_deg1" value="0.0" />
 <generic name="gui_actual_phase_shift1" value="0" />
 <generic name="gui_duty_cycle1" value="50" />
@@ -186,6 +186,7 @@
 <generic name="gui_en_dps_ports" value="false" />
 <generic name="gui_en_phout_ports" value="false" />
 <generic name="gui_phout_division" value="1" />
+<generic name="gui_en_lvds_ports" value="false" />
 <generic name="gui_mif_generate" value="false" />
 <generic name="gui_enable_mif_dps" value="false" />
 <generic name="gui_dps_cntr" value="C0" />
@@ -201,4 +202,5 @@
 <generic name="gui_cascade_outclk_index" value="0" />
 <generic name="gui_enable_cascade_in" value="false" />
 <generic name="gui_pll_cascading_mode" value="Create an adjpllin signal to connect with an upstream PLL" />
+<generic name="AUTO_REFCLK_CLOCK_RATE" value="-1" />
 </instance>

@@ -1,13 +1,30 @@
 module vga_controller(iRST_n,
                       iVGA_CLK,
+                      sdram_clk,
+                      done,
+                      read_state,
+                      readdata,
+                      read,
+                      in_button,
                       oBLANK_n,
                       oHS,
                       oVS,
                       oVGA_B,
                       oVGA_G,
-                      oVGA_R);
+                      oVGA_R,
+                     );
+
+parameter	ADDR_W	=	25;
+parameter	DATA_W	=	16;
+
 input iRST_n;
 input iVGA_CLK;
+input sdram_clk;
+input done;
+input	 [DATA_W-1:0]  readdata;
+input					in_button;
+output reg [3:0] read_state;
+output reg read;
 output reg oBLANK_n;
 output reg oHS;
 output reg oVS;
@@ -15,12 +32,23 @@ output [3:0] oVGA_B;
 output [3:0] oVGA_G;  
 output [3:0] oVGA_R;                       
 ///////// ////                     
-reg [18:0] ADDR;
 reg [23:0] bgr_data;
 wire VGA_CLK_n;
 wire [7:0] index;
 wire [23:0] bgr_data_raw;
 wire cBLANK_n,cHS,cVS,rst;
+
+// sdram stuff
+reg		[4:0]			write_count;
+reg		[ADDR_W-1:0]	address;
+wire					max_address;
+
+assign max_address = address >= 76800;
+
+
+assign index = readdata;
+// assign index = 8'hf0;
+
 ////
 assign rst = ~iRST_n;
 wire		[10:0]	Current_X;
@@ -31,34 +59,101 @@ video_sync_generator LTM_ins (.vga_clk(iVGA_CLK),
                               .VS(cVS),
 										.oCurrent_X(Current_X));
 ////
-////Addresss generator
-always@(posedge iVGA_CLK,negedge iRST_n)
-begin
-  if (!iRST_n)
-     ADDR<=19'd0;
-  else if (cHS==1'b0 && cVS==1'b0)
-     ADDR<=19'd0;
-  else if (cBLANK_n==1'b1)
-     ADDR<=ADDR+1;
-end
+
 //////////////////////////
-//////INDEX addr.
-assign VGA_CLK_n = ~iVGA_CLK;
-img_data	img_data_inst (
-	.address ( ADDR ),
-	.clock ( VGA_CLK_n ),
-	.q ( index )
-	);
+
+// synchronize VGA clock to be every 8 SDRAM clocks
+reg [4:0] clock_phase;
+
+always@(posedge sdram_clk)
+begin
+	if (!iRST_n || !done)
+	begin
+		write_count <= 5'b0;
+		read_state <= 4'b0;
+		read <= 1'b0;
+    clock_phase <= 5'b0;
+	 end
+	else
+	begin
+    case (read_state)
+      0 : begin //idle
+        address <= {ADDR_W{1'b0}};
+
+          if (done)
+        begin
+          read_state <= 4;
+        end
+      end
+      4 : begin //read
+          read <= 1;
+
+          if (!write_count[3])
+          write_count <= write_count + 1'b1;
+        
+      read_state <= 5;
+      end
+      5 : begin //latch read data
+        read <= 0;
+
+      if (!write_count[3])
+          write_count <= write_count + 5'b1;
+
+          read_state <= 6;
+        end
+      6 : begin //finish compare one data
+        if (write_count[3])
+        begin
+          write_count <= 5'b0;
+            read_state <= 7;
+        end
+        else
+          write_count <= write_count + 1'b1;
+      end
+      7 : begin
+
+        if (max_address) //finish compare all 
+        begin
+          address <=  {ADDR_W{1'b0}};
+          read_state <= 9;
+        end
+        else //compare the next data
+          begin
+          address <= address + 1'b1;
+            read_state <= 4;
+        end
+      end
+      9 : read_state <= 9;
+      default : read_state <= 0;
+    endcase
+  end
+
+  if (&clock_phase) begin
+    if (done) begin
+      // vga clock; latch valid data
+      bgr_data <= bgr_data_raw;
+      read_state <= read_state == 9 ? 0 : read_state;
+    end
+  end
+
+  clock_phase <= clock_phase + 1;
+  
+end
+
 //////Color table output
 img_index	img_index_inst (
 	.address ( index ),
-	.clock ( iVGA_CLK ),
+	.clock ( sdram_clk ),
 	.q ( bgr_data_raw)
-	);	
-//////
-//////latch valid data at falling edge;
-always@(posedge VGA_CLK_n) bgr_data <= bgr_data_raw;
+);
 
+assign VGA_CLK_n = ~iVGA_CLK;
+
+// //////latch valid data at falling edge;
+// always@(posedge VGA_CLK_n) 
+// begin
+//   bgr_data <= bgr_data_raw;
+// end
 wire [23:0] mbgr_data;
 wire [7:0]  mVGA_B,mVGA_G,mVGA_R;
 assign mbgr_data=(bgr_data==24'hffffff)? 24'hffffff: 24'h800000;
@@ -79,20 +174,3 @@ begin
 end
 
 endmodule
- 	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
