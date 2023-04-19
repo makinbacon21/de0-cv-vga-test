@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<instance entity-name="altera_pll" version="14.0" >
+<instance entity-name="altera_pll" version="20.1" >
 <generic name="debug_print_output" value="false" />
 <generic name="debug_use_rbc_taf_method" value="false" />
 <generic name="device_family" value="Cyclone V" />
@@ -186,7 +186,6 @@
 <generic name="gui_en_dps_ports" value="false" />
 <generic name="gui_en_phout_ports" value="false" />
 <generic name="gui_phout_division" value="1" />
-<generic name="gui_en_lvds_ports" value="false" />
 <generic name="gui_mif_generate" value="false" />
 <generic name="gui_enable_mif_dps" value="false" />
 <generic name="gui_dps_cntr" value="C0" />
@@ -202,5 +201,4 @@
 <generic name="gui_cascade_outclk_index" value="0" />
 <generic name="gui_enable_cascade_in" value="false" />
 <generic name="gui_pll_cascading_mode" value="Create an adjpllin signal to connect with an upstream PLL" />
-<generic name="AUTO_REFCLK_CLOCK_RATE" value="-1" />
 </instance>

@@ -152,15 +152,6 @@ assign test_global_reset_n   =(sample[3:2]==2'b10)?1'b0:1'b1;
 assign test_start_n         =(sample[4:3]==2'b01)?1'b0:1'b1;
 
 wire [2:0] test_result;
-assign test_result[0] =  KEY[0];
-assign test_result[1] =  sdram_test_complete? sdram_test_pass : heart_beat[23];
-assign test_result[2] =  heart_beat[23];
-
-reg [23:0] heart_beat;
-always @ (posedge CLOCK_50)
-begin
-	heart_beat <= heart_beat + 1;
-end	
 
 //	Reset Delay Timer
 Reset_Delay			r0	(	.iCLK(CLOCK_50),
@@ -174,6 +165,7 @@ vga_pll           u1    (   .refclk(CLOCK3_50),      //  refclk.clk
 							.outclk_1(SDRAM_LOAD_CLK)
 					    );
 
+wire [24:0] read_addr;
 wire [3:0]  read_state;
 assign mSEG7_DIG[23:12] = read_state;
 vga_controller vga_ins	(	.iRST_n(DLY_RST),
@@ -183,6 +175,7 @@ vga_controller vga_ins	(	.iRST_n(DLY_RST),
 							.read_state(read_state),
 							.readdata(readdata),
 							.read(read),
+							//.read_addr(read_addr),
 							.in_button(test_start_n),
 					  		.oHS(VGA_HS),
 					  		.oVS(VGA_VS),
@@ -208,7 +201,7 @@ Sdram_Control	u2	(	//	HOST Side
 						.WR_MAX_ADDR(25'h1ffffff),		//	
 						.WR_LENGTH(9'h80),
 						.WR_LOAD(!test_global_reset_n ),
-						.WR_CLK(clk_test),
+						.WR_CLK(SDRAM_LOAD_CLK),
 						//	FIFO Read Side 
 						.RD_DATA(readdata),
 						.RD(read),
@@ -216,7 +209,7 @@ Sdram_Control	u2	(	//	HOST Side
 						.RD_MAX_ADDR(25'h1ffffff),
 						.RD_LENGTH(9'h80),
 						.RD_LOAD(!test_global_reset_n ),
-						.RD_CLK(clk_test),
+						.RD_CLK(SDRAM_LOAD_CLK),
 						//	SDRAM Side
 						.SA(DRAM_ADDR),
 						.BA(DRAM_BA),
