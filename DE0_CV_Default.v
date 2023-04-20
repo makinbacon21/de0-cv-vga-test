@@ -200,8 +200,8 @@ Sdram_Control	u2	(	//	HOST Side
 						.WR_DATA(writedata),
 						.WR(write),
 						.WR_ADDR(stupid_write_address),
-						.WR_MAX_ADDR(stupid_write_address + 8),		//	
-						.WR_LENGTH(9'h08),
+						.WR_MAX_ADDR(stupid_write_address + 16),		//	
+						.WR_LENGTH(9'h10),
 						.WR_LOAD(!test_global_reset_n ),
 						.WR_CLK(SDRAM_LOAD_CLK),
 						//	FIFO Read Side 

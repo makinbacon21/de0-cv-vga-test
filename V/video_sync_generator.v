@@ -3,7 +3,8 @@ module video_sync_generator(reset,
                             blank_n,
                             HS,
                             VS,
-									 oCurrent_X);
+									 oCurrent_X,
+                            oCurrent_Y);
                             
 input reset;
 input vga_clk;
@@ -11,6 +12,7 @@ output reg blank_n;
 output reg HS;
 output reg VS;
 output		[10:0]	oCurrent_X;
+output		[10:0]	oCurrent_Y;
 ///////////////////
 /*
 --VGA Timing
@@ -56,7 +58,7 @@ parameter vert_front = 11;
 parameter H_sync_cycle = 96;
 parameter V_sync_cycle = 2;
 parameter H_BLANK = hori_front+H_sync_cycle ; //add by yang
-
+parameter V_BLANK = vert_front+V_sync_cycle ; //add by zack
 //////////////////////////
 reg [10:0] h_cnt;
 reg [9:0]  v_cnt;
@@ -90,6 +92,8 @@ assign cVD = (v_cnt<V_sync_cycle)?1'b0:1'b1;
 assign hori_valid = (h_cnt<(hori_line-hori_front)&& h_cnt>=hori_back)?1'b1:1'b0;
 assign vert_valid = (v_cnt<(vert_line-vert_front)&& v_cnt>=vert_back)?1'b1:1'b0;
 assign oCurrent_X	=	(h_cnt>=H_BLANK)	?	h_cnt-H_BLANK	:	11'h0	; //add by yang
+assign oCurrent_Y	=	(v_cnt>=V_BLANK)	?	v_cnt-V_BLANK	:	11'h0	; //add by yang
+
 
 assign cDEN = hori_valid && vert_valid;
 

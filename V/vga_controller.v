@@ -48,6 +48,9 @@ reg		[ADDR_W-1:0]	address;
 assign oStupidMemAddress = address;
 wire					max_address;
 reg [8:0] length;
+ 
+// want to show each line twice
+reg line1;
 
 //assign max_address = address >= 25'd76800;
 
@@ -57,12 +60,14 @@ reg [8:0] length;
 ////
 assign rst = ~iRST_n;
 wire		[10:0]	Current_X;
+wire		[10:0]	Current_Y;
 video_sync_generator LTM_ins (.vga_clk(iVGA_CLK),
                               .reset(rst),
                               .blank_n(cBLANK_n),
                               .HS(cHS),
                               .VS(cVS),
-															.oCurrent_X(Current_X));
+															.oCurrent_X(Current_X),
+															.oCurrent_Y(Current_Y));
 ////
 
 //////////////////////////
@@ -95,13 +100,14 @@ begin
 		read_state <= 4'b0;
 		read <= 1'b0;
     clock_phase <= 5'b0;
+		line1 <= 0;
 	end else begin
     case (read_state)
       0 : begin //idle
         address <= {ADDR_W{1'b0}};
 				length <= 9'b0;
 
-				if (done) begin
+				if (done && !oHS && !oVS) begin
           read_state <= 4;
 					//cal_data <= clk_cnt;
         end
@@ -124,38 +130,14 @@ begin
       6 : begin
 				// data is good right now, so we latch it.
  				index <= readdata;
-
-				// begin
-				// if (0<Current_X && Current_X <= VIDEO_W/3)
-				// 			index <= 8'hff;
-				// 		else if (Current_X > VIDEO_W/3 && Current_X <= VIDEO_W*2/3)
-				// 			index <= 8'ha0;
-				// 		else if(Current_X > VIDEO_W*2/3 && Current_X <=VIDEO_W)
-				// 			index <= 8'h6c;
-				// 		else index <= 8'h00;
-		
-				// end
-
+				// index <= Current_Y;
 				read_state <= 7;
-				
-        // if (write_count[3])
-        // begin
-        //   write_count <= 5'b0;
-        //   read_state <= 7;
-        // end else
-        //   write_count <= write_count + 1'b1;
       end
       7 : begin
-				// if we're done, reset the address.
+				// set new address
+				address <= (Current_X / 3) + ((Current_Y / 3) * 320);
 
 				// either way, wait around for a falling vga clock edge when we aren't blank
-        if (address >= 76800) begin
-          address <= {ADDR_W{1'b0}};
-					length <= 9'b0;
-        end else begin
-          address <= address + 1;
-					length <= length + 8;
-        end
 				if (vga_clk_falling && cBLANK_n) begin 
 					read_state <= 4;
 				end else begin
