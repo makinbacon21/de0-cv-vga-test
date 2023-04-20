@@ -113,7 +113,7 @@ module DE0_CV_Default(
 	  output      [3:0]  VGA_R,
 	  output             VGA_VS
 );
-
+parameter	ADDR_W	=	25;
 
 //=======================================================
 //  REG/WIRE declarations
@@ -167,7 +167,9 @@ vga_pll           u1    (   .refclk(CLOCK3_50),      //  refclk.clk
 
 wire [24:0] read_addr;
 wire [3:0]  read_state;
-assign mSEG7_DIG[23:12] = read_state;
+// assign mSEG7_DIG[23:12] = read_state;
+
+wire [ADDR_W-1:0] stupid_mem_address;
 vga_controller vga_ins	(	.iRST_n(DLY_RST),
 					  		.iVGA_CLK(VGA_CTRL_CLK),
 							.sdram_clk(SDRAM_LOAD_CLK),
@@ -181,7 +183,8 @@ vga_controller vga_ins	(	.iRST_n(DLY_RST),
 					  		.oVS(VGA_VS),
 					  		.oVGA_B(VGA_B),
 					  		.oVGA_G(VGA_G),
-					  		.oVGA_R(VGA_R)
+					  		.oVGA_R(VGA_R),
+							.oStupidMemAddress(stupid_mem_address)
 						);
 
 wire  [15:0]  writedata;
@@ -205,9 +208,9 @@ Sdram_Control	u2	(	//	HOST Side
 						//	FIFO Read Side 
 						.RD_DATA(readdata),
 						.RD(read),
-						.RD_ADDR(0),			//	Read odd field and bypess blanking
-						.RD_MAX_ADDR(25'h1ffffff),
-						.RD_LENGTH(9'h80),
+						.RD_ADDR(stupid_mem_address),			//	Read odd field and bypess blanking
+						.RD_MAX_ADDR(stupid_mem_address + 16),
+						.RD_LENGTH(9'h10),
 						.RD_LOAD(!test_global_reset_n ),
 						.RD_CLK(SDRAM_LOAD_CLK),
 						//	SDRAM Side
@@ -245,7 +248,8 @@ wire [3:0]  c_state;
 wire same;
 
 assign LEDR[0] = done;
-assign mSEG7_DIG[11:0] = c_state;
+// assign mSEG7_DIG[11:0] = c_state;
+assign mSEG7_DIG = stupid_mem_address;
 
 SdramFifoManager u4	(	.in_clk(clk_test),
 						.in_reset(test_software_reset_n),
