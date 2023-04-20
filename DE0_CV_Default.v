@@ -177,7 +177,6 @@ vga_controller vga_ins	(	.iRST_n(DLY_RST),
 							.read_state(read_state),
 							.readdata(readdata),
 							.read(read),
-							//.read_addr(read_addr),
 							.in_button(test_start_n),
 					  		.oHS(VGA_HS),
 					  		.oVS(VGA_VS),
@@ -200,9 +199,9 @@ Sdram_Control	u2	(	//	HOST Side
 						//	FIFO Write Side 
 						.WR_DATA(writedata),
 						.WR(write),
-						.WR_ADDR(0),
-						.WR_MAX_ADDR(25'h1ffffff),		//	
-						.WR_LENGTH(9'h80),
+						.WR_ADDR(stupid_write_address),
+						.WR_MAX_ADDR(stupid_write_address + 8),		//	
+						.WR_LENGTH(9'h08),
 						.WR_LOAD(!test_global_reset_n ),
 						.WR_CLK(SDRAM_LOAD_CLK),
 						//	FIFO Read Side 
@@ -251,13 +250,14 @@ assign LEDR[0] = done;
 // assign mSEG7_DIG[11:0] = c_state;
 assign mSEG7_DIG = stupid_mem_address;
 
+wire [ADDR_W-1:0] stupid_write_address;
 SdramFifoManager u4	(	.in_clk(clk_test),
 						.in_reset(test_software_reset_n),
 						.in_button(test_start_n),
 						.write(write),
 						.writedata(writedata),
-						.readdata(readdata),
-						.c_state(c_state),		
+						.stupid_write_addr(stupid_write_address),
+						.c_state(c_state),
 						.same(same),
 						.done(done)
 					);

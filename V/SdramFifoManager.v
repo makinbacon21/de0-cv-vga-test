@@ -16,7 +16,7 @@ module SdramFifoManager (
 	in_button,
 	write,
 	writedata,
-	readdata,
+	stupid_write_addr,
 	c_state,
 	same,
 	done
@@ -33,7 +33,7 @@ input					in_button;
 // data lines
 output					write;
 output	[DATA_W-1:0]	writedata;
-input	[DATA_W-1:0]	readdata;
+output  [ADDR_W-1:0]	stupid_write_addr;
 
 // states
 output         			same;
@@ -53,10 +53,10 @@ wire					same;
 wire	[7:0]			current_rom_output;
 reg		[18:0]			ADDR;
 reg						done;
+reg		[ADDR_W-1:0]	stupid_write_addr;
 reg		[31:0]			cal_data, clk_cnt;
 
 assign max_address = address >= 76800;
-assign same = readdata == writedata;
 
 // incr addr on clock and reset to 0 on reset
 always @(posedge in_clk, negedge in_reset)
@@ -75,13 +75,6 @@ img_data	img_data_inst	(	.address ( ADDR ),
 							);
 
 always @(posedge in_clk) begin
-	if (!in_reset)
-		clk_cnt <= 32'b0;
-	else  
-		clk_cnt <= clk_cnt + 32'b1;
-end
-
-always @(posedge in_clk) begin
 	if (!in_reset) begin 
 		pre_button <= 2'b11;
 		trigger <= 1'b0;
@@ -89,6 +82,7 @@ always @(posedge in_clk) begin
 		c_state <= 4'b0;
 		write <= 1'b0;
 		writedata <= 16'b0;
+		stupid_write_addr <= { ADDR_W{ 1'b0 } };
 		done <= 0;
 	end else begin
 		pre_button <= {pre_button[0], in_button};
@@ -99,19 +93,13 @@ always @(posedge in_clk) begin
 				done <= 1'b0;
 				address <= { ADDR_W{ 1'b0 } };
 
-				if (trigger) begin
-					c_state <= 4'd1;
-					cal_data<=clk_cnt;
-				end
+				c_state <= 1;
 			end
 			1 : begin //write
-				if (write_count[3]) begin
-					write_count <= 5'b0;
-					write <= 1'b1;
-					writedata <= current_rom_output;
-					c_state <= 4'd2;
-				end else
-					write_count <= write_count + 1'b1;
+				write <= 1'b1;
+				stupid_write_addr <= address;
+				writedata <= current_rom_output;
+				c_state <= 4'd2;
 			end
 			2 : begin //finish write one data
 					write <= 1'b0;
