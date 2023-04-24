@@ -200,16 +200,16 @@ Sdram_Control	u2	(	//	HOST Side
 						.WR_DATA(writedata),
 						.WR(write),
 						.WR_ADDR(stupid_write_address),
-						.WR_MAX_ADDR(stupid_write_address + 16),		//	
-						.WR_LENGTH(9'h10),
+						.WR_MAX_ADDR(stupid_write_address + 1),		//	
+						.WR_LENGTH(9'h08),
 						.WR_LOAD(!test_global_reset_n ),
 						.WR_CLK(SDRAM_LOAD_CLK),
 						//	FIFO Read Side 
 						.RD_DATA(readdata),
 						.RD(read),
 						.RD_ADDR(stupid_mem_address),			//	Read odd field and bypess blanking
-						.RD_MAX_ADDR(stupid_mem_address + 16),
-						.RD_LENGTH(9'h10),
+						.RD_MAX_ADDR(stupid_mem_address + 1),
+						.RD_LENGTH(9'h08),
 						.RD_LOAD(!test_global_reset_n ),
 						.RD_CLK(SDRAM_LOAD_CLK),
 						//	SDRAM Side

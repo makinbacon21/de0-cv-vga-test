@@ -51,25 +51,15 @@ reg		[4:0]			write_count;
 wire					max_address;
 wire					same;
 wire	[7:0]			current_rom_output;
-reg		[18:0]			ADDR;
+reg		[18:0]			rom_addr;
 reg						done;
 reg		[ADDR_W-1:0]	stupid_write_addr;
 reg		[31:0]			cal_data, clk_cnt;
 
 assign max_address = address >= 76800;
 
-// incr addr on clock and reset to 0 on reset
-always @(posedge in_clk, negedge in_reset)
-begin
-	// write regardless lol
-	if (!in_reset)
-		ADDR<=19'd0;
-	else
-		ADDR<=ADDR+1;
-end
-
 // instantiate rom
-img_data	img_data_inst	(	.address ( ADDR ),
+img_data	img_data_inst	(	.address ( rom_addr ),
 								.clock ( in_clk ),
 								.q ( current_rom_output )
 							);
@@ -84,6 +74,7 @@ always @(posedge in_clk) begin
 		writedata <= 16'b0;
 		stupid_write_addr <= { ADDR_W{ 1'b0 } };
 		done <= 0;
+		rom_addr<=19'd0;
 	end else begin
 		pre_button <= {pre_button[0], in_button};
 		trigger <= !pre_button[0] && pre_button[1];
@@ -100,6 +91,7 @@ always @(posedge in_clk) begin
 				stupid_write_addr <= address;
 				writedata <= current_rom_output;
 				c_state <= 4'd2;
+				rom_addr<=rom_addr+1;
 			end
 			2 : begin //finish write one data
 					write <= 1'b0;
@@ -109,6 +101,7 @@ always @(posedge in_clk) begin
 				if (max_address) //finish write all(burst) 
 				begin
 					address <=  { ADDR_W{ 1'b0 } };
+					rom_addr<=19'd0;
 					c_state <= 4'd10;
 				end
 			else //write the next data

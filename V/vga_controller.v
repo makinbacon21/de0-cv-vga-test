@@ -135,7 +135,7 @@ begin
       end
       7 : begin
 				// set new address
-				address <= (Current_X / 3) + ((Current_Y / 3) * 320);
+				address <= (Current_X / 2) + ((Current_Y / 2) * 320);
 
 				// either way, wait around for a falling vga clock edge when we aren't blank
 				if (vga_clk_falling && cBLANK_n) begin 
